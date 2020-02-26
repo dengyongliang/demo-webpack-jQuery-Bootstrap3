@@ -19,7 +19,7 @@ function findFilePathAndName(startPath) {
 			if (stats.isDirectory() && val !== 'common') {
 				findNext(fPath)
 			}
-			if (stats.isFile()) {
+			if (stats.isFile() && fPath.indexOf(".js") > 0) {
 				paths.push(fPath)
 				names.push(val.split(".")[0])
 			}
@@ -33,14 +33,17 @@ function findFilePathAndName(startPath) {
 		paths: paths
 	};
 }
-let filesJs = findFilePathAndName('./src/js')
+// let filesJs = findFilePathAndName('./src/htmljs')
 let filesHtml = findFilePathAndName('./src/html')
 module.exports = {
 	// 构建webpack入口
 	entryList: () => {
-		const entryList = {};
-		filesJs.names.map((v, i, arr) => {
-			entryList[v] = path.resolve(filesJs.paths[i])
+		let entryList = {};
+		filesHtml.names.map((v, i, arr) => {
+			// console.log(path.resolve(filesHtml.paths[i]))
+			let url = filesHtml.paths[i].split("src")[1].split(".")[0]
+			// url = url.substr(0, url.lastIndexOf('\\'))
+			entryList[v] = path.resolve(filesHtml.paths[i])
 		});
 		return entryList;
 	},
@@ -50,9 +53,10 @@ module.exports = {
 		filesHtml.names.map((v, i, arr) => {
 			pageList.push(
 				new HtmlWebpackPlugin({
-					template: path.resolve(filesHtml.paths[i]),
-					filename: path.resolve(filesHtml.paths[i]).replace(/src/, 'dist'),
-					chunks: ['common', 'jquery', v],
+					filename: path.resolve(filesHtml.paths[i]).replace(/src/, 'dist').split(".")[0] + '.html',
+					template: path.resolve(filesHtml.paths[i]).replace(/\.js/, '.html'),
+					chunks: ['common', 'jquery', 'bootstrap', v],
+					inject: 'body', // js的script注入到body底部
 					//压缩配置
 					minify: {
 						//删除Html注释
