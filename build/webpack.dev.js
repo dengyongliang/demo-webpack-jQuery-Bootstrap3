@@ -6,12 +6,12 @@ const config = require('../config')
 const utils = require('./utils')
 const FriendlyErrorsPlugin = require('friendly-errors-webpack-plugin')
 const portfinder = require('portfinder')
-let webpackcommon = require('./webpack.common')
+const webpackcommon = require('./webpack.common')
 
 const HOST = process.env.HOST
 const PORT = process.env.PORT && Number(process.env.PORT)
 
-webpackcommon = merge(webpackcommon, {
+const webpackConfig = merge(webpackcommon, {
     // cheap-module-eval-source-map is faster for development
     devtool: config.dev.devtool,
 
@@ -50,19 +50,19 @@ module.exports = new Promise((resolve, reject) => {
             // publish the new Port, necessary for e2e tests
             process.env.PORT = port
             // add port to devServer config
-            webpackcommon.devServer.port = port
+            webpackConfig.devServer.port = port
 
             // Add FriendlyErrorsPlugin
-            webpackcommon.plugins.push(new FriendlyErrorsPlugin({
+            webpackConfig.plugins.push(new FriendlyErrorsPlugin({
                 compilationSuccessInfo: {
-                    messages: [`Your application is running here: http://${webpackcommon.devServer.host}:${port}`],
+                    messages: [`Your application is running here: http://${webpackConfig.devServer.host}:${port}`],
                 },
                 onErrors: config.dev.notifyOnErrors
                     ? utils.createNotifierCallback()
                     : undefined
             }))
 
-            resolve(webpackcommon)
+            resolve(webpackConfig)
         }
     })
 })

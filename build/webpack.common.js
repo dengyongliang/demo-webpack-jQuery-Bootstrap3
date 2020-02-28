@@ -1,22 +1,23 @@
 const path = require('path')
 const config = require('../config')
+const UglifyJsPlugin = require('uglifyjs-webpack-plugin')
+const MiniCssExtractPlugin = require('mini-css-extract-plugin')
 const { CleanWebpackPlugin } = require('clean-webpack-plugin')
 // const HtmlWebpackPlugin = require('html-webpack-plugin')
-const UglifyJsPlugin = require('uglifyjs-webpack-plugin')
 const CopyWebpackPlugin = require('copy-webpack-plugin')
-const MiniCssExtractPlugin = require('mini-css-extract-plugin')
 const webpack = require('webpack')
-const { entryList, htmlPluginList } = require('./setting')
-function resolve (dir) {
+const utils = require('./utils')
+
+function resolve(dir) {
     return path.join(__dirname, '..', dir)
 }
 module.exports = {
     context: path.resolve(__dirname, '../'),
     // 入口JS路径
-    entry: entryList(),
+    entry: utils.entryList(),
     resolve: {
         alias: {
-          '@': resolve('src'),
+            '@': resolve('src'),
         }
     },
     plugins: [
@@ -37,13 +38,7 @@ module.exports = {
         new MiniCssExtractPlugin({
             filename: 'css/[name].min.css'
         }),
-        // 设置html模板生成路径
-        // new HtmlWebpackPlugin({
-        //     filename: 'index.html',
-        //     template: './src/html/index/index.html',
-        //     chunks: ['index']
-        // }),
-        ...htmlPluginList()
+        ...utils.htmlPluginList()
     ],
     // 编译输出路径
     output: {
@@ -52,70 +47,11 @@ module.exports = {
         // 输出路径为dist
         path: config.build.assetsRoot,
         publicPath: process.env.NODE_ENV === 'production'
-        ? config.build.assetsPublicPath
-        : config.dev.assetsPublicPath
-    },
-    optimization: {
-        splitChunks: {
-            cacheGroups: {
-                // vendors: {
-                //     test: /[\\/]node_modules[\\/]/,
-                //     chunks: "all",
-                //     minChunks: 2,
-                //     priority: 18,
-                // },
-                // 提取公共jquery文件
-                jquery: {
-                    test: /jquery/,
-                    name: 'jquery',
-                    chunks: 'all',
-                    priority: 20,
-                    reuseExistingChunk: true
-                },
-                bootstrap: {
-                    test: /bootstrap/,
-                    name: 'bootstrap',
-                    chunks: 'all',
-                    priority: 19,
-                    reuseExistingChunk: true
-                },
-                // 提取公共css文件
-                styles: {
-                    test: /[\\/]common[\\/].+\.css$/,
-                    name: 'common',
-                    chunks: 'all',
-                    enforce: true,
-                    priority: 17,
-                    reuseExistingChunk: true
-                }
-            }
-        },
-        // 解决IE8“缺少标识符”错误
-        minimizer: [
-            new UglifyJsPlugin({
-                uglifyOptions: {
-                    ie8: true
-                }
-            })
-        ]
+            ? config.build.assetsPublicPath
+            : config.dev.assetsPublicPath
     },
     module: {
         rules: [
-            // 解决ES6转ES5
-            {
-                test: /\.js$/,
-                exclude: /(node_modules|bower_components)/,
-                use: {
-                    loader: 'babel-loader',
-                    options: {
-                        presets: ['@babel/preset-env'],
-                        plugins: [
-                            '@babel/plugin-transform-runtime',
-                            '@babel/plugin-transform-modules-commonjs'
-                        ]
-                    }
-                }
-            },
             {
                 test: /\.css$/,
                 use: [
@@ -172,6 +108,50 @@ module.exports = {
                     }
                 }
             }
+        ]
+    },
+    optimization: {
+        splitChunks: {
+            cacheGroups: {
+                // vendors: {
+                //     test: /[\\/]node_modules[\\/]/,
+                //     chunks: "all",
+                //     minChunks: 2,
+                //     priority: 18,
+                // },
+                // 提取公共jquery文件
+                jquery: {
+                    test: /jquery/,
+                    name: 'jquery',
+                    chunks: 'all',
+                    priority: 20,
+                    reuseExistingChunk: true
+                },
+                bootstrap: {
+                    test: /bootstrap/,
+                    name: 'bootstrap',
+                    chunks: 'all',
+                    priority: 19,
+                    reuseExistingChunk: true
+                },
+                // 提取公共css文件
+                styles: {
+                    test: /[\\/]common[\\/].+\.css$/,
+                    name: 'common',
+                    chunks: 'all',
+                    enforce: true,
+                    priority: 17,
+                    reuseExistingChunk: true
+                }
+            }
+        },
+        // 解决IE8“缺少标识符”错误
+        minimizer: [
+            new UglifyJsPlugin({
+                uglifyOptions: {
+                    ie8: true
+                }
+            })
         ]
     },
     node: {
